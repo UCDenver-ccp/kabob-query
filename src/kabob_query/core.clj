@@ -6,6 +6,8 @@
              :refer [render-string]]
             [edu.ucdenver.ccp.kr.kb
              :refer [kb open]]
+            [edu.ucdenver.ccp.kr.rdf
+             :refer [*use-inference*]]
             [edu.ucdenver.ccp.kr.sesame.kb
              :refer [*default-server* *repository-name* *username* *password*]]
             [edu.ucdenver.ccp.kr.sparql
@@ -23,4 +25,6 @@
 (defn query
   [query-name query-args kb-params]
   (with-open [kb (open-kb kb-params)]
-    (sparql-query kb (render-string (slurp (resource query-name)) query-args))))
+    (binding [*use-inference* false]
+      ;; FIXME: Throw a meaningful exception if the resource is not found.
+      (sparql-query kb (render-string (slurp (resource query-name)) query-args)))))
