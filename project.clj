@@ -6,6 +6,7 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [org.clojure/tools.cli "0.3.3"]
+                 [org.slf4j/slf4j-nop  "1.7.20"]
                  [sinistral/mantle "0.2.1"]
                  [stencil "0.5.0"]
                  [edu.ucdenver.ccp/kr-core "1.4.20-SNAPSHOT"]
