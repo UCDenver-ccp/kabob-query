@@ -1,7 +1,7 @@
 
 (ns kabob-query.cli
   (:refer-clojure :exclude [format])
-  (:require [clojure.java.io :refer [file reader writer]]
+  (:require [clojure.java.io :refer [file resource]]
             [clojure.tools.cli :refer [parse-opts]]
             [mantle.collection :refer [select-values]]
             [mantle.io :refer [format]]
@@ -15,16 +15,12 @@
                ["-p" "--backend-params PARAMS" "Parameter map for KB backend."
                 :parse-fn read-string]])
 
-(defn suffix-qname
-  [m]
-  (assoc m :query-name (str (:query-name m) ".mustache")))
-
 (defn -main
   [& args]
   (let [opts (:options (parse-opts args cli-opts))
-        rslt (apply query
-                    (select-values (suffix-qname opts)
-                                   [:query-name :query-args :backend-params]))
+        rslt (query (resource (str (:query-name opts) ".mustache"))
+                    (:query-args opts)
+                    (:backend-params opts))
         keys (keys (first rslt))]
     (doseq [r rslt]
       (format *out* "~{~a~^, ~}~%" (select-values r keys)))))

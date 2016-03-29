@@ -1,8 +1,6 @@
 
 (ns kabob-query.core
-  (:require [clojure.java.io
-             :refer [resource]]
-            [stencil.core
+  (:require [stencil.core
              :refer [render-string]]
             [edu.ucdenver.ccp.kr.kb
              :refer [kb open]]
@@ -23,8 +21,8 @@
     (open (kb HTTPRepository))))
 
 (defn query
-  [query-name query-args kb-params]
+  [template query-args kb-params]
   (with-open [kb (open-kb kb-params)]
     (binding [*use-inference* false]
       ;; FIXME: Throw a meaningful exception if the resource is not found.
-      (sparql-query kb (render-string (slurp (resource query-name)) query-args)))))
+      (sparql-query kb (render-string (slurp template) query-args)))))
