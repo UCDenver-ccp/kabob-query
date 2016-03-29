@@ -15,10 +15,15 @@
                ["-p" "--backend-params PARAMS" "Parameter map for KB backend."
                 :parse-fn read-string]])
 
+(defn template
+  [s]
+  (or (resource (str s ".mustache"))
+      (throw (ex-info (str "Template query not found: " s) {}))))
+
 (defn -main
   [& args]
   (let [opts (:options (parse-opts args cli-opts))
-        rslt (query (resource (str (:query-name opts) ".mustache"))
+        rslt (query (template (:query-name opts))
                     (:query-args opts)
                     (:backend-params opts))
         keys (keys (first rslt))]

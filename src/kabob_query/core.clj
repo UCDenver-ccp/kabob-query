@@ -24,5 +24,4 @@
   [template query-args kb-params]
   (with-open [kb (open-kb kb-params)]
     (binding [*use-inference* false]
-      ;; FIXME: Throw a meaningful exception if the resource is not found.
       (sparql-query kb (render-string (slurp template) query-args)))))
