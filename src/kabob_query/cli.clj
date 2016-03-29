@@ -1,8 +1,10 @@
 
 (ns kabob-query.cli
+  (:refer-clojure :exclude [format])
   (:require [clojure.java.io :refer [file reader writer]]
             [clojure.tools.cli :refer [parse-opts]]
             [mantle.collection :refer [select-values]]
+            [mantle.io :refer [format]]
             [kabob-query.core :refer [query]])
   (:import [java.io PushbackReader StringReader])
   (:gen-class))
@@ -19,11 +21,13 @@
 
 (defn -main
   [& args]
-  (let [opts (:options (parse-opts args cli-opts))]
-    (clojure.pprint/pprint
-     (apply query
-            (select-values (suffix-qname opts)
-                           [:query-name :query-args :backend-params])))))
+  (let [opts (:options (parse-opts args cli-opts))
+        rslt (apply query
+                    (select-values (suffix-qname opts)
+                                   [:query-name :query-args :backend-params]))
+        keys (keys (first rslt))]
+    (doseq [r rslt]
+      (format *out* "~{~a~^, ~}~%" (select-values r keys)))))
 
 ;; Example invocation:
 ;; java -jar target/kabob-query-0.1.0-SNAPSHOT-standalone.jar \
