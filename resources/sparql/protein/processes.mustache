@@ -1,0 +1,15 @@
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX iaouniprot: <http://kabob.ucdenver.edu/iao/uniprot/>
+PREFIX franzOption_clauseReorderer: <franz:identity>
+
+# Given a UniProt accession, the following query returns 
+# biological processes in which it participates:
+select (?bp as ?a) {
+         iaouniprot:UNIPROT_{{uniprot_acc}}_ICE obo:IAO_0000219 ?bioentity . # IAO:denotes
+  		 ?specificbioentity rdfs:subClassOf ?bioentity .
+         ?has_participant_r owl:someValuesFrom ?specificbioentity .
+         ?has_participant_r owl:onProperty obo:RO_0000057 . # RO:has_participant
+         ?specificbp rdfs:subClassOf ?has_participant_r .
+         ?specificbp rdfs:subClassOf ?bp .
+         ?bp rdfs:subClassOf* obo:GO_0008150 . # GO:biological_process       
+}
