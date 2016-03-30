@@ -1,9 +1,15 @@
+
 PREFIX obo: <http://purl.obolibrary.org/obo/>
 PREFIX iaouniprot: <http://kabob.ucdenver.edu/iao/uniprot/>
 PREFIX franzOption_clauseReorderer: <franz:identity>
 
-# Given a UniProt accession, the following query returns 
-# the bio-entity (protein) denoted by the accession:
+# Given a UniProt accession, the following query returns the bio-entity
+# (protein) denoted by the accession.
+
 select (?bioentity as ?a) {
-         iaouniprot:UNIPROT_{{uniprot_acc}}_ICE obo:IAO_0000219 ?bioentity . # IAO:denotes
+  iaouniprot:UNIPROT_{{uniprot_acc}}_ICE obo:IAO_0000219 ?bioentity . # IAO:denotes
 }
+
+# Local Variables:
+# mode: sparql
+# End:
