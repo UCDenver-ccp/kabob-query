@@ -1,0 +1,24 @@
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX iaouniprot: <http://kabob.ucdenver.edu/iao/uniprot/>
+PREFIX franzOption_clauseReorderer: <franz:identity>
+
+# Given a UniProt accession, the following query returns 
+# the cellular components where the protein is known to localize:
+
+select ?cc ?label {
+
+         iaouniprot:UNIPROT_{{uniprot-accession}}_ICE obo:IAO_0000219 ?bioentity . # IAO:denotes
+
+         ?specificbioentity rdfs:subClassOf ?bioentity .
+         ?localizes_r owl:someValuesFrom ?specificbioentity .
+         ?localizes_r owl:onProperty obo:RO_0002313 . # RO:transports or maintains localization of
+         ?localization rdfs:subClassOf ?localizes_r .
+         ?localization rdfs:subClassOf obo:GO_0051179 . # GO:localization
+         ?localization rdfs:subClassOf ?location_r .
+         ?location_r owl:onProperty obo:RO_0002339 . # RO:has target end location
+  	 ?location_r owl:someValuesFrom ?specificcc .
+         ?specificcc rdfs:subClassOf ?cc .
+         ?cc rdfs:subClassOf* obo:GO_0005575 . # GO:cellular_component
+  		
+	 ?cc rdfs:label ?label
+}
