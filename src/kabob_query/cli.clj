@@ -1,34 +1,52 @@
 
 (ns kabob-query.cli
   (:refer-clojure :exclude [format])
-  (:require [clojure.java.io :refer [file resource]]
+  (:require [clojure.pprint :refer [pprint]]
+            [clojure.java.io :refer [reader resource]]
             [clojure.tools.cli :refer [parse-opts]]
             [mantle.collection :refer [select-values]]
             [mantle.io :refer [format]]
             [kabob-query.core :refer [query]])
-  (:import [java.io PushbackReader StringReader])
+  (:import [java.io BufferedReader StringReader])
   (:gen-class))
 
-(def cli-opts [["-q" "--query-name NAME" "Query to run."]
-               ["-a" "--query-args ARGS" "Argument map for query."
-                :parse-fn read-string]
-               ["-p" "--backend-params PARAMS" "Parameter map for KB backend."
-                :parse-fn read-string]])
+(def ^{:private true} cli-opts
+  [["-l" "--list" "List available queries."]
+   ["-q" "--query-name NAME" "Query to run."]
+   ["-a" "--query-args ARGS" "Argument map for query."
+    :parse-fn read-string]
+   ["-p" "--backend-params PARAMS" "Parameter map for KB backend."
+    :parse-fn read-string]])
 
-(defn template
+(defn- template
   [s]
   (or (resource (str s ".mustache"))
       (throw (ex-info (str "Template query not found: " s) {}))))
 
-(defn -main
-  [& args]
-  (let [opts (:options (parse-opts args cli-opts))
-        rslt (query (template (:query-name opts))
+(defn- cli-query
+  [opts]
+  (let [rslt (query (template (:query-name opts))
                     (:query-args opts)
                     (:backend-params opts))
         keys (keys (first rslt))]
     (doseq [r rslt]
       (format *out* "~{~a~^, ~}~%" (select-values r keys)))))
+
+(defn- cli-list
+  []
+  (format *out* "~{~a~%~}" (line-seq (reader (resource "index")))))
+
+(defn- cli-usage
+  [s]
+  (format *out* "~{~a~%~}" (line-seq (BufferedReader. (StringReader. s)))))
+
+(defn -main
+  [& args]
+  (let [spec (parse-opts args cli-opts)
+        opts (:options spec)]
+    (cond (:list opts) (cli-list)
+          (:query-name opts) (cli-query opts)
+          :else (cli-usage (:summary spec)))))
 
 ;; Example invocation:
 ;; java -jar target/kabob-query-0.1.0-SNAPSHOT-standalone.jar \
