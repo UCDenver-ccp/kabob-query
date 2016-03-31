@@ -12,7 +12,7 @@
              :refer [sparql-query]])
   (:import [org.openrdf.repository.http HTTPRepository]))
 
-(defn open-kb
+(defn- open-kb
   [params]
   (binding [*default-server* (:db-url params)
             *repository-name* (:repository-name params)
@@ -21,7 +21,8 @@
     (open (kb HTTPRepository))))
 
 (defn query
-  [template query-args kb-params]
+  [template query-args kb-params r-fn]
   (with-open [kb (open-kb kb-params)]
     (binding [*use-inference* false]
-      (sparql-query kb (render-string (slurp template) query-args)))))
+      (doseq [r (sparql-query kb (render-string (slurp template) query-args))]
+        (r-fn r)))))

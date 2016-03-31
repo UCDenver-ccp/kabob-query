@@ -25,12 +25,14 @@
 
 (defn- cli-query
   [opts]
-  (let [rslt (query (template (:query-name opts))
-                    (:query-args opts)
-                    (:backend-params opts))
-        keys (keys (first rslt))]
-    (doseq [r rslt]
-      (format *out* "~{~a~^, ~}~%" (select-values r keys)))))
+  (let [kseq (atom nil)
+        r-fn (fn [r]
+               (when-not @kseq (swap! kseq (fn [_] (keys r))))
+               (format *out* "~{~a~^, ~}~%" (select-values r @kseq)))]
+    (query (template (:query-name opts))
+           (:query-args opts)
+           (:backend-params opts)
+           r-fn)))
 
 (defn- cli-list
   []
