@@ -6,7 +6,7 @@ PREFIX franzOption_clauseReorderer: <franz:identity>
 # Given a UniProt accession, return the biological processes in which it
 # participates.
 
-select ?bp ?label {
+select (iaouniprot:UNIPROT_{{uniprot-accession}}_ICE as ?acc) ?bp ?label {
 
   iaouniprot:UNIPROT_{{uniprot-accession}}_ICE obo:IAO_0000219 ?bioentity . # IAO:denotes
 

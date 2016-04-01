@@ -6,7 +6,7 @@ PREFIX franzOption_clauseReorderer: <franz:identity>
 # Given a UniProt accession, the following query returns 
 # the cellular components where the protein is known to localize:
 
-select ?cc ?label {
+select (iaouniprot:UNIPROT_{{uniprot-accession}}_ICE as ?acc) ?cc ?label {
 
   iaouniprot:UNIPROT_{{uniprot-accession}}_ICE obo:IAO_0000219 ?bioentity . # IAO:denotes
 
