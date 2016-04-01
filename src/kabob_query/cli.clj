@@ -23,12 +23,19 @@
   (or (resource (str s ".mustache"))
       (throw (ex-info (str "Template query not found: " s) {}))))
 
+(defn- emit-seq->csv
+  [s]
+  (format *out* "~{~a~^, ~}~%" s))
+
 (defn- cli-query
   [opts]
   (let [kseq (atom nil)
         r-fn (fn [r]
-               (when-not @kseq (swap! kseq (fn [_] (keys r))))
-               (format *out* "~{~a~^, ~}~%" (select-values r @kseq)))]
+               (when-not @kseq
+                 (let [r-keys (keys r)]
+                   (emit-seq->csv (map name r-keys))
+                   (swap! kseq (fn [_] r-keys))))
+               (emit-seq->csv (select-values r @kseq)))]
     (query (template (:query-name opts))
            (:query-args opts)
            (:backend-params opts)
