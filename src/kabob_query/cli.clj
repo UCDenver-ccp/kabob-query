@@ -11,17 +11,11 @@
   (:gen-class))
 
 (def ^{:private true} cli-opts
-  [["-l" "--list" "List available queries."]
-   ["-q" "--query-name NAME" "Query to run."]
+  [["-q" "--query-name NAME" "Query to run."]
    ["-a" "--query-args ARGS" "Argument map for query."
     :parse-fn read-string]
    ["-p" "--backend-params PARAMS" "Parameter map for KB backend."
     :parse-fn read-string]])
-
-(defn- template
-  [s]
-  (or (resource (str s ".mustache"))
-      (throw (ex-info (str "Template query not found: " s) {}))))
 
 (defn- emit-seq->csv
   [s]
@@ -36,14 +30,10 @@
                    (emit-seq->csv (map name r-keys))
                    (swap! kseq (fn [_] r-keys))))
                (emit-seq->csv (select-values r @kseq)))]
-    (query (template (:query-name opts))
+    (query (:query-name opts)
            (:query-args opts)
            (:backend-params opts)
            r-fn)))
-
-(defn- cli-list
-  []
-  (format *out* "~{~a~%~}" (line-seq (reader (resource "index")))))
 
 (defn- cli-usage
   [s]
@@ -53,13 +43,12 @@
   [& args]
   (let [spec (parse-opts args cli-opts)
         opts (:options spec)]
-    (cond (:list opts) (cli-list)
-          (:query-name opts) (cli-query opts)
+    (cond (:query-name opts) (cli-query opts)
           :else (cli-usage (:summary spec)))))
 
 ;; Example invocation:
 ;; java -jar target/kabob-query-0.1.0-SNAPSHOT-standalone.jar \
 ;;   kabob-query/cli \
 ;;   -q sparql/test/connection \
-;;   -a "{:value 3}" \
+;;   -a "[3]" \
 ;;   -p "{:db-url \"http://hostname:10035\" :repository-name \"repo\" :username \"user\" :password \"pass\"}"

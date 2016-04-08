@@ -1,28 +1,27 @@
 
 (ns kabob-query.core
-  (:require [stencil.core
-             :refer [render-string]]
-            [edu.ucdenver.ccp.kr.kb
-             :refer [kb open]]
-            [edu.ucdenver.ccp.kr.rdf
-             :refer [*use-inference*]]
-            [edu.ucdenver.ccp.kr.sesame.kb
-             :refer [*default-server* *repository-name* *username* *password*]]
-            [edu.ucdenver.ccp.kr.sparql
-             :refer [sparql-query]])
-  (:import [org.openrdf.repository.http HTTPRepository]))
+  (:require [clojure.string :as s]
+            [mantle.io :refer [fmtstr]]
+            [kabob-query.kb :refer [*kb* open-kb]]))
 
-(defn- open-kb
-  [params]
-  (binding [*default-server* (:db-url params)
-            *repository-name* (:repository-name params)
-            *username* (:username params)
-            *password* (:password params)]
-    (open (kb HTTPRepository))))
+(def +project-name+ "kabob-query")
+
+(defn resolve-query
+  "Resolve a query name to a namespace and function."
+  [qname]
+  (let [parts (s/split qname #"/")
+        ns-str (s/replace (s/join "/" (concat [+project-name+] (butlast parts))) "/" ".")
+        fn-str (s/join ":" ["api" (last parts)])]
+    (require (symbol ns-str))
+    (when-let [ns (find-ns (symbol ns-str))]
+      (when-let [fn (get (ns-interns ns) (symbol fn-str))]
+        (and (fn? (deref fn)) fn)))))
 
 (defn query
-  [template query-args kb-params r-fn]
-  (with-open [kb (open-kb kb-params)]
-    (binding [*use-inference* false]
-      (doseq [r (sparql-query kb (render-string (slurp template) query-args))]
-        (r-fn r)))))
+  [q-name q-args kb-params r-fn]
+  (if-let [q (resolve-query q-name)]
+    (with-open [kb (open-kb kb-params)]
+      (binding [*kb* kb]
+        (doseq [r (apply q q-args)]
+          (r-fn r))))
+    (throw (ex-info (fmtstr "Unknown query: ~a" q-name) {}))))

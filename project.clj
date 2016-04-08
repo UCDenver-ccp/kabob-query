@@ -11,7 +11,7 @@
                  [stencil "0.5.0"]
                  [edu.ucdenver.ccp/kr-core "1.4.20-SNAPSHOT"]
                  [edu.ucdenver.ccp/kr-sesame-core "1.4.20-SNAPSHOT"]
-                 [edu.ucdenver.ccp/kabob-query-templates "0.1.0-SNAPSHOT"]]
+                 [edu.ucdenver.ccp/kabob-query-templates "0.2.0-SNAPSHOT"]]
 
   :profiles {:dev {:dependencies [[midje "1.8.3"]]
                    :plugins [[lein-midje "3.2"]]}
