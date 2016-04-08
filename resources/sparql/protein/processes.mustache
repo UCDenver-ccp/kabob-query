@@ -6,11 +6,10 @@ PREFIX franzOption_clauseReorderer: <franz:identity>
 # Given a UniProt accession, return the biological processes in which it
 # participates.
 
-select (iaouniprot:UNIPROT_{{uniprot-accession}}_ICE as ?acc) ?bp ?label {
+select ("{{src-id}}" as ?source_id) (<{{ice-id}}> as ?ice_id) ?bp ?label
+{
+  ?specificbioentity rdfs:subClassOf <{{bio-id}}> .
 
-  iaouniprot:UNIPROT_{{uniprot-accession}}_ICE obo:IAO_0000219 ?bioentity . # IAO:denotes
-
-  ?specificbioentity rdfs:subClassOf ?bioentity .
   ?has_participant_r owl:someValuesFrom ?specificbioentity .
   ?has_participant_r owl:onProperty obo:RO_0000057 . # RO:has_participant
   ?specificbp rdfs:subClassOf ?has_participant_r .
