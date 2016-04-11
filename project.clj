@@ -9,9 +9,11 @@
                  [org.slf4j/slf4j-nop  "1.7.20"]
                  [sinistral/mantle "0.2.1"]
                  [stencil "0.5.0"]
+                 [edu.ucdenver.ccp/kabob-build "1.3.0-SNAPSHOT"
+                  :exclusions [org.slf4j/slf4j-log4j12 potemkin]]
+                 [edu.ucdenver.ccp/kabob-query-templates "0.2.0-SNAPSHOT"]
                  [edu.ucdenver.ccp/kr-core "1.4.20-SNAPSHOT"]
-                 [edu.ucdenver.ccp/kr-sesame-core "1.4.20-SNAPSHOT"]
-                 [edu.ucdenver.ccp/kabob-query-templates "0.2.0-SNAPSHOT"]]
+                 [edu.ucdenver.ccp/kr-sesame-core "1.4.20-SNAPSHOT"]]
 
   :profiles {:dev {:dependencies [[midje "1.8.3"]]
                    :plugins [[lein-midje "3.2"]]}

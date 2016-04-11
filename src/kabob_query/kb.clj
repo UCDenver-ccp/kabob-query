@@ -2,10 +2,12 @@
 (ns kabob-query.kb
   "In which is defined the mechanisms for interacting with (and specifically:
   querying) a knowledge base instance."
-  (:require [edu.ucdenver.ccp.kr.kb
-             :refer [kb open]]
+  (:require [edu.ucdenver.ccp.kabob.build.input-kb
+             :refer [initialize-kb]]
+            [edu.ucdenver.ccp.kr.kb
+             :refer [kb initialize open]]
             [edu.ucdenver.ccp.kr.rdf
-             :refer [*use-inference* synch-ns-mappings]]
+             :refer [*use-inference*]]
             [edu.ucdenver.ccp.kr.sesame.kb
              :refer [*default-server* *repository-name* *username* *password*]]
             [edu.ucdenver.ccp.kr.sparql :as krs])
@@ -28,7 +30,7 @@
                        (filter #(> (.indexOf (second %) "/iao/") 0)
                                kb-ns-map))))
 
-(defn open-kb
+(defn- open-kb-impl
   [params]
   ;; FIXME: The binding form below points to a deficiency in KR: having to bind
   ;; these global variables and forces the immediate client to be aware of the
@@ -43,18 +45,22 @@
             *repository-name* (:repository-name params)
             *username* (:username params)
             *password* (:password params)]
-    (let [kb-instance (synch-ns-mappings (open (kb HTTPRepository)))
-          ;; Attach the IAO namespaces to the KB.  These are identified
-          ;; separately to enable the query chaining and translation functions
-          ;; to render the identifiers as full URIs and not the shortened
-          ;; prefix form returned by KR.  Giving these functions the ability to
-          ;; map between short and long forms relieves the query template
-          ;; author from having to specify the short form PREFIXs for every
-          ;; possible source in the template.
-          iao-nspaces (select-iao-namespaces (:ns-map-to-long kb-instance))]
-      (if (seq iao-nspaces)
-        (assoc kb-instance :iao-namespaces iao-nspaces)
-        (ex-info "No IAO namespaces registered in KB" {:registered-namespaces (:ns-map-to-long kb-instance)})))))
+    (open (kb HTTPRepository))))
+
+(defn open-kb
+  [params]
+  (let [kb-instance (initialize-kb (open-kb-impl params))
+        ;; Attach the IAO namespaces to the KB.  These are identified
+        ;; separately to enable the query chaining and translation functions
+        ;; to render the identifiers as full URIs and not the shortened
+        ;; prefix form returned by KR.  Giving these functions the ability to
+        ;; map between short and long forms relieves the query template
+        ;; author from having to specify the short form PREFIXs for every
+        ;; possible source in the template.
+        iao-nspaces (select-iao-namespaces (:ns-map-to-long kb-instance))]
+    (if (seq iao-nspaces)
+      (assoc kb-instance :iao-namespaces iao-nspaces)
+      (ex-info "No IAO namespaces registered in KB" {:registered-namespaces (:ns-map-to-long kb-instance)}))))
 
 (defn sparql-query
   [kb query-string]

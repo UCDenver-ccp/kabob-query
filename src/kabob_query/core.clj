@@ -6,7 +6,7 @@
 
 (def +project-name+ "kabob-query")
 
-(defn resolve-query
+(defn- resolve-query
   "Resolve a query name to a namespace and function."
   [qname]
   (let [parts (s/split qname #"/")
