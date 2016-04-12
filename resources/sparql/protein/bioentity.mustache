@@ -1,0 +1,14 @@
+
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+
+# Given a source-specific protein identifier, the following query returns the
+# bio-entity (protein) denoted by the ID.
+
+select ?bio_id {
+  # IAO:denotes
+  <{{ice-id}}> obo:IAO_0000219 ?bio_id
+}
+
+# Local Variables:
+# mode: sparql
+# End:
