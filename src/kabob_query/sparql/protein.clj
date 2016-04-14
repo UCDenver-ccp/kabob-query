@@ -43,3 +43,12 @@
                           {:src-id source-id
                            :ice-id ice-id
                            :bio-id (bio-id kb ice-id)}))))
+
+(define-interface-fn binary-interaction-partners kb
+  [source-id]
+  (let [ice-id (id->ice-uri source-id (:iao-namespaces kb))]
+    (sparql-query kb
+                  (render "sparql/protein/binary-interaction-partners"
+                          {:src-id source-id
+                           :ice-id ice-id
+                           :bio-id (bio-id kb ice-id)}))))
