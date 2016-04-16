@@ -1,0 +1,32 @@
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX franzOption_clauseReorderer: <franz:identity>
+
+# Return the proteins known to participate in binary interactions with the input protein identifier.
+
+select ("{{src-id}}" as ?source_id) (<{{ice-id}}> as ?ice_id) ?kabob_protein ?interaction_label
+{
+  ?specificbioentity rdfs:subClassOf <{{bio-id}}> .
+
+  ?has_participant_r1 owl:someValuesFrom ?specificbioentity .
+  ?has_participant_r1 owl:onProperty obo:RO_0000057 . # RO:has_participant
+  ?interaction rdfs:subClassOf ?has_participant_r1 .
+
+  # confirm has_participant cardinality
+  ?interaction rdfs:subClassOf ?rcard .
+  ?rcard owl:cardinality 2 . # require 2 participants for a binary interaction
+  ?rcard owl:onProperty obo:RO_0000057 . # RO:has_participant
+
+  ?interaction rdfs:subClassOf* obo:MI_0190 . # MI:interaction_type
+  ?interaction rdfs:label ?interaction_label .
+
+  ?interaction rdfs:subClassOf ?has_participant_r2 .
+  ?has_participant_r2 owl:onProperty obo:RO_0000057 . # RO:has_participant
+  ?has_participant_r2 owl:someValuesFrom ?interacting_partner .
+  ?interacting_partner rdfs:subClassOf ?kabob_protein .
+  FILTER (?kabob_protein != <{{bio-id}}>) .
+
+}
+
+# Local Variables:
+# mode: sparql
+# End:
