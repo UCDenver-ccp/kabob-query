@@ -1,0 +1,14 @@
+
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+
+# Given a KB-specific identifier for a BIO entity, the following query returns
+# the ICE identifiers that denote that entity.
+
+select ?ice_id {
+  # IAO:denotes
+  ?ice_id obo:IAO_0000219 <{{bio-id}}>
+}
+
+# Local Variables:
+# mode: sparql
+# End:

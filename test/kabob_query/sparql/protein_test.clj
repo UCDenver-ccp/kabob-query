@@ -15,7 +15,7 @@
   => (throws #"'uniprot' is not a valid IAO"))
 
 (fact
-  (#'id/bio-id {:ns-map-to-long {"kbio" "http://kabob/bio/"}} ...ice-id...)
+  (#'id/bio-id {:ns-map-to-long {"kbio" "http://kabob/bio/"}} ..ice-id..)
   => "http://kabob/bio/BIO_123"
   (provided (#'id/query:bioentity anything anything)
             => '[{?/id kbio/BIO_123}]))
@@ -39,3 +39,19 @@
     (against-background
       (#'kabob-query.kb/open-kb-impl {}) => (open (kb :sesame-mem))
       (#'id/query:bioentity anything anything) => '[{?/id kbio/BIO_123}])))
+
+(facts "The 'highest' lexographically sorted ID is used as the primary ID."
+  (fact "uniprot"
+    (#'id/ice-id1 "uniprot" ["UNIPROT_P01_ICE" "UNIPROT_P09_ICE" "UNIPROT_P03_ICE"])
+    => "P09"))
+
+(facts "UniProt IDs that start with 'P' are preferred."
+  (fact "the only P-id is selected"
+    (#'id/ice-id1 "uniprot" ["UNIPROT_Q1_ICE" "UNIPROT_P1_ICE" "UNIPROT_R1_ICE"])
+    => "P1")
+  (fact "the 'highest' P-id is selected"
+    (#'id/ice-id1 "uniprot" ["UNIPROT_P9_ICE" "UNIPROT_P1_ICE" "UNIPROT_R1_ICE"])
+    => "P9")
+  (fact "in the absence of a P-id, the 'highest' ID is selected."
+    (#'id/ice-id1 "uniprot" ["UNIPROT_Q1_ICE" "UNIPROT_X1_ICE" "UNIPROT_R1_ICE"])
+    => "X1"))
