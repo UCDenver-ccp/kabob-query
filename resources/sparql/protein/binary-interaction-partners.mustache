@@ -3,7 +3,7 @@ PREFIX franzOption_clauseReorderer: <franz:identity>
 
 # Return the proteins known to participate in binary interactions with the input protein identifier.
 
-select ("{{src-id}}" as ?source_id) (<{{ice-id}}> as ?ice_id) ?kabob_protein ?interaction_label
+select (<{{bio-id}}> as ?source_bio_id) (<{{ice-id}}> as ?ice_id) ("{{src-id}}" as ?ext_source_id) ?interaction_label ?partner_bio_id
 {
   ?specificbioentity rdfs:subClassOf <{{bio-id}}> .
 
@@ -22,9 +22,8 @@ select ("{{src-id}}" as ?source_id) (<{{ice-id}}> as ?ice_id) ?kabob_protein ?in
   ?interaction rdfs:subClassOf ?has_participant_r2 .
   ?has_participant_r2 owl:onProperty obo:RO_0000057 . # RO:has_participant
   ?has_participant_r2 owl:someValuesFrom ?interacting_partner .
-  ?interacting_partner rdfs:subClassOf ?kabob_protein .
-  FILTER (?kabob_protein != <{{bio-id}}>) .
-
+  ?interacting_partner rdfs:subClassOf ?partner_bio_id .
+  filter (?partner_bio_id != <{{bio-id}}>) .
 }
 
 # Local Variables:
