@@ -43,6 +43,18 @@
       (s/join [uri-ns (s/upper-case (s/join "_" [source id "ice"]))])
       (throw (ex-info (fmtstr "'~a' is not a valid IAO source identifier." source) (or ns-map {}))))))
 
+(defn ice-uri->id
+  "Translate an ICE URI into a source-specific identifier. Source-specific IDs
+  are expected to be of the form `<source>:<id>`, for example:
+  `uniprot:p15692`."
+  [ice-id]
+  (let [[match nmspc ns_id] (re-matches #"http://kabob.ucdenver.edu/iao/([^/]+)/(.+)_ICE" ice-id)
+        id (s/replace-first ns_id
+                            (java.util.regex.Pattern/compile (str (s/upper-case nmspc) "_"))
+                            "")]
+    (s/join ":" [nmspc id])))
+
+
 (defn query:bioentity
   [kb ice-id]
   (sparql-query kb (render "sparql/id/bioentity" {:ice-id ice-id})))
