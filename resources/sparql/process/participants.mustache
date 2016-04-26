@@ -4,7 +4,7 @@ PREFIX franzOption_clauseReorderer: <franz:identity>
 
 # Given a biological processes, return all participants in that process
 
-select ({{process-id}} as ?process_id) (group_concat(?ice; separator = ";") AS ?participant_ice_ids)
+select ({{process-id}} as ?process_id) (group_concat(?ice; separator = "{{separator}}") AS ?participant_ice_ids)
 {
   ?specificbp rdfs:subClassOf {{process-id}} .
   ?specificbp rdfs:subClassOf ?has_participant_r .
