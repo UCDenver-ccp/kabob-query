@@ -7,19 +7,23 @@
             [mantle.io :refer [fmtstr]]
             [kabob-query.kb :refer [sparql-query]]
             [kabob-query.template :refer [render]])
-  (:import java.util.regex.Pattern))
+  (:import [java.util.regex Pattern]))
+
+(def ^{:private true :const true} separator ":")
+
+(def ^{:private true :const true} separator-re (Pattern/compile separator))
 
 (defn ext-id->parts
   "Split into parts the external identifier that a user might specify to
   describe the ID and the source from which it hails, e.g. \"uniprot:P12345\"."
   [id]
-  (s/split id #":"))
+  (s/split id separator-re))
 
 (defn parts->ext-id
   "Construct from parts the external identifier that a user might specify to
   describe the ID and the source from which it hails, e.g. \"uniprot:P12345\"."
   [iao eid]
-  (str iao ":" eid))
+  (str iao separator eid))
 
 (defn fq
   "Fully qualify the short names returned by KR."
@@ -53,7 +57,7 @@
     (if-let [[match iao-ns prefixed-iao-id] (re-matches ice-re ice-id)]
       (let [ns-re (Pattern/compile (str (s/upper-case iao-ns) "_"))
             iao-id (s/replace-first prefixed-iao-id ns-re "")]
-        (s/join ":" [iao-ns iao-id]))
+        (s/join separator [iao-ns iao-id]))
       (throw (ex-info (str "Unexpected IAO IRI: " ice-id)
                       {:ice-re ice-re :ice-id ice-id})))))
 
