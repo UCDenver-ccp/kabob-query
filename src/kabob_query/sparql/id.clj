@@ -6,7 +6,8 @@
             [mantle.collection :refer [single]]
             [mantle.io :refer [fmtstr]]
             [kabob-query.kb :refer [sparql-query]]
-            [kabob-query.template :refer [render]]))
+            [kabob-query.template :refer [render]])
+  (:import java.util.regex.Pattern))
 
 (defn ext-id->parts
   "Split into parts the external identifier that a user might specify to
@@ -43,6 +44,18 @@
       (s/join [uri-ns (s/upper-case (s/join "_" [source id "ice"]))])
       (throw (ex-info (fmtstr "'~a' is not a valid IAO source identifier." source) (or ns-map {}))))))
 
+(defn ice-uri->id
+  "Translate an ICE URI into a source-specific identifier. Source-specific IDs
+  are expected to be of the form `<source>:<id>`, for example:
+  `uniprot:p15692`."
+  [ice-id]
+  (let [[match nmspc ns_id] (re-matches #"http://kabob.ucdenver.edu/iao/([^/]+)/(.+)_ICE" ice-id)
+        id (s/replace-first ns_id
+                            (Pattern/compile (str (s/upper-case nmspc) "_"))
+                            "")]
+    (s/join ":" [nmspc id])))
+
+
 (defn query:bioentity
   [kb ice-id]
   (sparql-query kb (render "sparql/id/bioentity" {:ice-id ice-id})))
@@ -62,24 +75,3 @@
   constructed; e.g. for \"UNIPROT_P12345_ICE\", return \"P12345\"."
   [id]
   (s/join "_" (butlast (rest (s/split (name id) #"_")))))
-
-(defmulti ice-id
-  "Return the primary (for some definition of 'primary') ICE identifier for a
-  BIO entity of a particular type, e.g. `:protein`, `:gene`, etc."
-  (fn [kb entity-type iao bio-id] entity-type))
-
-(defmulti ice-id1
-  "Since it is possible for a BIO entity to be denoted by multiple ICE
-  identifiers, we need some way to select one of these as *the* identifier to
-  which it should be mapped.  The method by which the primary identifier is
-  determined may vary by source (IAO)."
-  (fn [iao ids] iao))
-
-(defmethod ice-id1 :default ice-id1:default
-  [_ ids]
-  (last (sort (map ice-id->entity-id ids))))
-
-(defmethod ice-id :default ice-id:default
-  [kb _ iao bio-id]
-  (ice-id1 iao (filter #(= (str "iao" iao) (namespace %))
-                       (map #(single (vals %)) (query:ice kb bio-id)))))

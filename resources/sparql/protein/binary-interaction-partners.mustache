@@ -3,7 +3,7 @@ PREFIX franzOption_clauseReorderer: <franz:identity>
 
 # Return the proteins known to participate in binary interactions with the input protein identifier.
 
-select (<{{bio-id}}> as ?source_bio_id) (<{{ice-id}}> as ?ice_id) ("{{src-id}}" as ?ext_source_id) ?interaction_label ?partner_bio_id
+select  ("{{src-id}}" as ?ext_source_id) (<{{ice-id}}> as ?ice_id) ?interaction_label (group_concat(?partner_ice_id; separator = "{{separator}}") AS ?partner_ice_ids)
 {
   ?specificbioentity rdfs:subClassOf <{{bio-id}}> .
 
@@ -24,7 +24,9 @@ select (<{{bio-id}}> as ?source_bio_id) (<{{ice-id}}> as ?ice_id) ("{{src-id}}" 
   ?has_participant_r2 owl:someValuesFrom ?interacting_partner .
   ?interacting_partner rdfs:subClassOf ?partner_bio_id .
   filter (?partner_bio_id != <{{bio-id}}>) .
+  ?partner_ice_id obo:IAO_0000219 ?partner_bio_id .
 }
+group by ?partner_bio_id ?interaction_label
 
 # Local Variables:
 # mode: sparql
