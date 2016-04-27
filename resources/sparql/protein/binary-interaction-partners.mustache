@@ -3,7 +3,9 @@ PREFIX franzOption_clauseReorderer: <franz:identity>
 
 # Return the proteins known to participate in binary interactions with the input protein identifier.
 
-select  ("{{src-id}}" as ?ext_source_id) (<{{ice-id}}> as ?ice_id) ?interaction_label (group_concat(?partner_ice_id; separator = "{{separator}}") AS ?partner_ice_ids)
+select ("{{src-id}}" as ?ext_source_id)
+       ?interaction_label
+       (group_concat(?partner_ice_id; separator = "{{separator}}") as ?partner_ice_ids)
 {
   ?specificbioentity rdfs:subClassOf <{{bio-id}}> .
 

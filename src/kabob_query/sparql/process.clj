@@ -11,7 +11,8 @@
                    (let [ids (s/split id_list separator-re)
                          short_ids (sort (map id/ice-uri->id ids))]
                      (s/join separator short_ids )))]
-    (map #(assoc % '?/ext_participant_ids (bio->ext (get % '?/participant_ice_ids)))
+    (map #(dissoc (assoc % '?/ext_participant_ids (bio->ext (get % '?/participant_ice_ids)))
+                  '?/participant_ice_ids)
          (sparql-query kb
                        (render "sparql/process/participants"
                                {:process-id process-id

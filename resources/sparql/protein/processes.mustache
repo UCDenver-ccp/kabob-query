@@ -6,7 +6,7 @@ PREFIX franzOption_clauseReorderer: <franz:identity>
 # Given a UniProt accession, return the biological processes in which it
 # participates.
 
-select ("{{src-id}}" as ?source_id) (<{{ice-id}}> as ?ice_id) ?bp ?label
+select ("{{src-id}}" as ?source_id) ?bp ?label
 {
   ?specificbioentity rdfs:subClassOf <{{bio-id}}> .
 

@@ -12,7 +12,6 @@
     (sparql-query kb
                   (render "sparql/protein/cellular-components"
                           {:src-id source-id
-                           :ice-id ice-id
                            :bio-id (id/bio-id kb ice-id)}))))
 
 (define-interface-fn processes kb
@@ -21,23 +20,22 @@
     (sparql-query kb
                   (render "sparql/protein/processes"
                           {:src-id source-id
-                           :ice-id ice-id
                            :bio-id (id/bio-id kb ice-id)}))))
+
+(defn ^{:private true} bio->ext
+  [id-list]
+  (let [ids (s/split id-list separator-re)
+        short-ids (sort (map id/ice-uri->id ids))]
+    (s/join separator short-ids)))
 
 (define-interface-fn binary-interaction-partners kb
   [source-id]
   (let [ice-uri (id/id->ice-uri source-id (:iao-namespaces kb))
-        [iao eid] (id/ext-id->parts source-id)
-        ;; the query uses group_concat to return a semi-colon-delimited list of
-        ;; ICE URIs for the interaction partners.
-        bio->ext (fn [id_list]
-                   (let [ids (s/split id_list separator-re)
-                         short-ids (sort (map id/ice-uri->id ids))]
-                     (s/join separator short-ids)))]
-    (map #(assoc % '?/ext_partner_ids (bio->ext (get % '?/partner_ice_ids)))
+        [iao eid] (id/ext-id->parts source-id)]
+    (map #(dissoc (assoc % '?/ext_partner_ids (bio->ext (get % '?/partner_ice_ids)))
+                  '?/partner_ice_ids)
          (sparql-query kb
                        (render "sparql/protein/binary-interaction-partners"
                                {:src-id source-id
-                                :ice-id ice-uri
                                 :bio-id (id/bio-id kb ice-uri)
                                 :separator separator})))))
