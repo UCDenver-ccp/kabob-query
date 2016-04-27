@@ -5,12 +5,10 @@
   defined in the `kabob-query.core` namespace."
   (:require [clojure.string :as s]))
 
-
-;; For queries that return lists of identifiers using the SPARQL group_concat
-;; function, the identifiers are delimited by the separator defined here.
-(def ^{:const true}
-  separator ";")
-
+(def ^{:const true} separator
+  "For queries that return lists of identifiers using the SPARQL group_concat
+  function, the identifiers are delimited by the separator defined here."
+  ";")
 
 (defmacro define-interface-fn
   [fn-name kb-sym fn-args & body]

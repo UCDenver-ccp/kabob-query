@@ -45,16 +45,15 @@
       (throw (ex-info (fmtstr "'~a' is not a valid IAO source identifier." source) (or ns-map {}))))))
 
 (defn ice-uri->id
-  "Translate an ICE URI into a source-specific identifier. Source-specific IDs
-  are expected to be of the form `<source>:<id>`, for example:
-  `uniprot:p15692`."
+  "Translate an ICE URI into a source-specific identifier of the form
+  `<source>:<id>`, for example: `uniprot:p15692`."
   [ice-id]
-  (let [[match nmspc ns_id] (re-matches #"http://kabob.ucdenver.edu/iao/([^/]+)/(.+)_ICE" ice-id)
+  (let [ice-re #"http://kabob.ucdenver.edu/iao/([^/]+)/(.+)_ICE"
+        [match nmspc ns_id] (re-matches ice-re ice-id)
         id (s/replace-first ns_id
                             (Pattern/compile (str (s/upper-case nmspc) "_"))
                             "")]
     (s/join ":" [nmspc id])))
-
 
 (defn query:bioentity
   [kb ice-id]
