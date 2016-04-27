@@ -3,12 +3,16 @@
   "In which is defined the mechanisms to build the query API.  This namespace
   is not intended to be used by query clients; the external interface is
   defined in the `kabob-query.core` namespace."
-  (:require [clojure.string :as s]))
+  (:require [clojure.string :as s])
+  (:import [java.util.regex Pattern]))
 
 (def ^{:const true} separator
   "For queries that return lists of identifiers using the SPARQL group_concat
   function, the identifiers are delimited by the separator defined here."
   ";")
+
+(def ^{:const true} separator-re
+  (Pattern/compile separator))
 
 (defmacro define-interface-fn
   [fn-name kb-sym fn-args & body]
