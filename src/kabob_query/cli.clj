@@ -17,9 +17,27 @@
    ["-p" "--backend-params PARAMS" "Parameter map for KB backend."
     :parse-fn read-string]])
 
+(defmulti ->str #(class %))
+
+(defmethod ->str :default
+  [x]
+  (str x))
+
+(defmethod ->str clojure.lang.Symbol
+  [x]
+  (str (namespace x) ":" (name x)))
+
 (defn- emit-seq->csv
   [s]
-  (format *out* "~{~a~^, ~}~%" s))
+  ;; When printing the resultset, remap the namespace separator in all keywords
+  ;; from "/" to ":".  Since makes non-IAO elements (e.g. 'obo/GO_00) look like
+  ;; our short-form IAO elements (e.g. "uniprot:P_12345").  This allows to
+  ;; cheat on queries that take non-IAO elements as input by specifying the
+  ;; 'obo:' prefix; should the user simply copy and paste the term from the
+  ;; output of another query, everything will work as expected.
+  (format *out* "~{~a~^, ~}~%" (map ->str s)))
+
+(str)
 
 (defn- cli-query
   [opts]
