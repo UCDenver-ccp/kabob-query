@@ -5,7 +5,7 @@ PREFIX franzOption_clauseReorderer: <franz:identity>
 # Given a UniProt accession, the following query returns 
 # the cellular components where the protein is known to localize:
 
-select ("{{src-id}}" as ?source_id) (<{{ice-id}}> as ?ice_id) ?cc ?label
+select ("{{src-id}}" as ?source_id) ?cc ?label
 {
   ?specificbioentity rdfs:subClassOf <{{bio-id}}> .
 
