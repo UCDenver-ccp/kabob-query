@@ -1,6 +1,7 @@
 
 (ns kabob-query.sparql.id-test
-  (:require [kabob-query.kb :refer [sparql-query]]
+  (:require [clojure.string :as s]
+            [kabob-query.kb :refer [sparql-query]]
             [kabob-query.sparql.id :as id])
   (:use [midje.sweet]))
 
@@ -27,10 +28,19 @@
     (#'id/id->ice-uri "uniprot:p0" {})
     => (throws #"'uniprot' is not a valid IAO")))
 
-(facts
+(defn iao-ice
+  [iao ice]
+  (s/join "/" ["http://kabob.ucdenver.edu/iao" iao ice]))
+
+(facts "about IDs from valid IAO IRIs"
   (fact
-    (id/ice-uri->id "http://kabob.ucdenver.edu/iao/uniprot/UNIPROT_A0A0G2KB10_ICE")
+    (id/ice-uri->id (iao-ice "uniprot" "UNIPROT_A0A0G2KB10_ICE"))
     => "uniprot:A0A0G2KB10")
   (fact
-    (id/ice-uri->id "http://kabob.ucdenver.edu/iao/refseq/REFSEQ_XP_005158717_ICE")
+    (id/ice-uri->id (iao-ice "refseq" "REFSEQ_XP_005158717_ICE"))
     => "refseq:XP_005158717"))
+
+(facts "about IDs from invalid IAO IRIs"
+  (fact
+    (id/ice-uri->id "http://blah/FOO_X123_ICE")
+    => (throws #"Unexpected IAO IRI: ")))
