@@ -1,0 +1,12 @@
+
+prefix obo: <http://purl.obolibrary.org/obo/>
+
+# Given a bio entity, return the NCBI taxonomy ID to which it belongs.
+select ("{{src-id}}" as ?entity_id) ?ncbi_id
+where {
+  <{{bio-id}}> obo:RO_0002162 ?ncbi_id
+}
+
+# Local Variables:
+# mode: sparql
+# End:
