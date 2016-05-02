@@ -1,0 +1,19 @@
+
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix obo: <http://purl.obolibrary.org/obo/>
+
+# Given a bio entity, return the NCBI taxonomy ID to which it belongs.
+select ("{{src-id}}" as ?entity_id) ?ncbi_id
+where {
+  # Our BIO entity is a subclass of a restriction ...
+  <{{bio-id}}> rdfs:subClassOf _:in_taxon_restriction .
+  # ... in particular, an `in taxon` property restriction ...
+  _:in_taxon_restriction owl:onProperty obo:RO_0002162 .
+  # ... the subject of which is the taxonomy ID.
+  _:in_taxon_restriction owl:someValuesFrom ?ncbi_id
+}
+
+# Local Variables:
+# mode: sparql
+# End:
