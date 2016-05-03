@@ -39,3 +39,15 @@
                                {:src-id source-id
                                 :bio-id (id/bio-id kb ice-uri)
                                 :separator separator})))))
+
+(define-interface-fn targeted-by-drug kb
+  [source-id]
+  (let [ice-uri (id/id->ice-uri source-id (:iao-namespaces kb))
+        [iao eid] (id/ext-id->parts source-id)]
+    (map #(dissoc (assoc % '?/ext_drug_ids (bio->ext (get % '?/drug_ice_ids)))
+                  '?/drug_ice_ids)
+         (sparql-query kb
+                       (render "sparql/protein/targeted-by-drug"
+                               {:src-id source-id
+                                :bio-id (id/bio-id kb ice-uri)
+                                :separator separator})))))

@@ -1,0 +1,47 @@
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ccp_obo_ext: <http://ccp.ucdenver.edu/obo/ext/>
+PREFIX franzOption_clauseReorderer: <franz:identity>
+
+# Given a protein accession, the following query returns
+# the drugs that target the protein, i.e. the drugs to which
+# the protein binds:
+
+select ("{{src-id}}" as ?ext_source_id)
+       (group_concat(?drug_ice_id; separator = "{{separator}}") as ?drug_ice_ids)
+{
+  ?target_sc rdfs:subClassOf <{{bio-id}}> .
+
+  # the target is a participant in an interaction
+  ?has_target_as_participant_r owl:someValuesFrom ?target_sc .
+  ?has_target_as_participant_r owl:onProperty obo:RO_0000057 . # RO:has_participant
+  ?interaction rdfs:subClassOf ?has_target_as_participant_r .
+
+  ?interaction rdfs:subClassOf* ccp_obo_ext:GO_MI_EXT_binding_or_direct_interaction .
+
+  # the interaction has another participant that the drug role inheres_in
+  ?interaction rdfs:subClassOf ?has_drug_as_participant_r .
+  ?has_drug_as_participant_r owl:onProperty obo:RO_0000057 . # RO:has_participant
+  ?has_drug_as_participant_r owl:someValuesFrom ?drug_sc .
+
+  # the drug must inhere the drug role (CHEBI:23888)
+  ?interaction rdfs:subClassOf ?realizes_drug_role_r .
+  ?realizes_drug_role_r owl:onProperty obo:BFO_0000055 . # BFO:realizes
+  ?realizes_drug_role_r owl:someValuesFrom ?drugrole .
+  ?drugrole rdfs:subClassOf obo:CHEBI_23888 .  # CHEBI:drug
+  ?drugrole rdfs:subClassOf ?inheres_in_r .
+  ?inheres_in_r owl:onProperty obo:RO_0000052 . # RO:inheres_in
+  ?inheres_in_r owl:someValuesFrom ?drug_sc .
+
+  # the drug in the interaction is subclass of the main
+  # kabob drug bioentity (to which IDs are linked)
+  ?drug_sc rdfs:subClassOf ?drug_bioentity .
+  FILTER (?drug_bioentity != <{{bio-id}}>)
+  ?drug_ice_id obo:IAO_0000219 ?drug_bioentity .
+
+  }
+group by ?drug_bioentity
+
+
+# Local Variables:
+# mode: sparql
+# End:
