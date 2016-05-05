@@ -1,0 +1,16 @@
+
+prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#>
+prefix owl: <http://www.w3.org/2002/07/owl#>
+prefix obo: <http://purl.obolibrary.org/obo/>
+
+# Given a bio entity, return the any and all labels that are
+# associated with it.
+select ("{{src-id}}" as ?entity_id) ?label
+where {
+  # labels are assigned to bio-entities using rdfs:label
+  <{{bio-id}}> rdfs:label ?label .
+}
+
+# Local Variables:
+# mode: sparql
+# End:
