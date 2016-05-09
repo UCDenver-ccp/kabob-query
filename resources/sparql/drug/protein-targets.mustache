@@ -1,0 +1,50 @@
+PREFIX obo: <http://purl.obolibrary.org/obo/>
+PREFIX ccp_obo_ext: <http://ccp.ucdenver.edu/obo/ext/>
+PREFIX franzOption_clauseReorderer: <franz:identity>
+
+# Given a drug accession, the following query returns
+# the bioentities that are targets of the drug, i.e. bioentities
+# to which the drug binds:
+
+select ("{{src-id}}" as ?ext_source_id)
+       (group_concat(?target_ice_id; separator = "{{separator}}") as ?target_ice_ids)
+{
+  ?drug_sc rdfs:subClassOf <{{bio-id}}> .
+
+  # the drug is part of a has_participant restriction
+  ?has_drug_as_participant_r owl:someValuesFrom ?drug_sc .
+  ?has_drug_as_participant_r owl:onProperty obo:RO_0000057 . # RO:has_participant
+
+  # there is an interaction that has_participant the drug
+  ?interaction rdfs:subClassOf ?has_drug_as_participant_r .
+  ?interaction rdfs:subClassOf* ccp_obo_ext:GO_MI_EXT_binding_or_direct_interaction .
+
+  # the drug must inhere the drug role (CHEBI:23888)
+  ?interaction rdfs:subClassOf ?realizes_drug_role_r .
+  ?realizes_drug_role_r owl:onProperty obo:BFO_0000055 . # BFO:realizes
+  ?realizes_drug_role_r owl:someValuesFrom ?drugrole .
+  ?drugrole rdfs:subClassOf obo:CHEBI_23888 .  # CHEBI:drug
+  ?drugrole rdfs:subClassOf ?inheres_in_r .
+  ?inheres_in_r owl:onProperty obo:RO_0000052 . # RO:inheres_in
+  ?inheres_in_r owl:someValuesFrom ?drug_sc .
+
+  # the interaction has another participant that is the target of the drug
+  ?interaction rdfs:subClassOf ?has_target_as_participant_r .
+  ?has_target_as_participant_r owl:onProperty obo:RO_0000057 . # RO:has_participant
+  ?has_target_as_participant_r owl:someValuesFrom ?target_sc .
+
+  # the target participant is a subclass of some bioentity
+  ?target_sc rdfs:subClassOf ?target_bioentity .
+  # the target bioentity is different from the drug bioentity
+  FILTER (?target_bioentity !=  <{{bio-id}}>) .
+
+  # the target ICE identifiers denote the target bioentity
+  ?target_ice_id obo:IAO_0000219 ?target_bioentity . # IAO:denotes
+
+}
+group by ?target_bioentity
+
+
+# Local Variables:
+# mode: sparql
+# End:
